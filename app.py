@@ -13,6 +13,8 @@ from huggingface_hub import hf_hub_download
 from cachetools import TTLCache, cached
 import json
 from pathlib import Path
+from flask import Flask, redirect # <-- NEW IMPORTS
+import threading # <-- NEW IMPORT
 
 # --- CONFIGURATION ---
 BASE_MODEL_ID = "runwayml/stable-diffusion-v1-5"
@@ -183,7 +185,7 @@ def generate_full_lesson(topic, level):
     
     # 1.Find ALL matching rows for the topic
     topic_data_df = data[(data['Topic'].str.strip().str.lower() == topic.strip().lower()) & 
-                         (data['Level'] == level)]
+                          (data['Level'] == level)]
     
     if topic_data_df.empty:
         raise gr.Error("Topic not found. Please enter the exact topic name (e.g., 'Cells') and check the Level.")
@@ -265,6 +267,22 @@ iface = gr.Interface(
     description="Enter a topic (like 'Cells' or 'Introduction to Biology') to generate the complete, multi-step visual and audio lesson."
 )
 
+# --- FLASK DEPLOYMENT CONFIGURATION ---
+
+# 1. Create the Flask app instance
+flask_app = Flask(__name__)
+
+# 2. Add the Gradio app to the Flask app, mounting it at the /gradio path
+# This is where the Gradio interface will be accessed.
+flask_app = gr.mount_gradio_app(flask_app, iface, path="/gradio")
+
+# 3. Create a simple Flask route to redirect users from the root URL (/)
+@flask_app.route("/")
+def redirect_to_gradio():
+    # Redirects the user to the Gradio interface path
+    return redirect("/gradio") 
+
 if __name__ == "__main__":
-    # The 'server_name="0.0.0.0"' ensures the app is accessible outside the container
-    iface.launch(server_name="0.0.0.0", server_port=7860)
+    # Launch the Flask app on the required port (7860) and host (0.0.0.0)
+    # The platform expects the Flask app to start directly.
+    flask_app.run(host="0.0.0.0", port=7860)
