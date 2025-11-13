@@ -1,4 +1,4 @@
-Model Name / Tool,Type,Primary Use in Your Project
+Model Name / Tool,Type,Primary Use in Your Project//
 Stable Diffusion v1.5,Diffusion Model,The core model used to generate the initial images from the text prompts (BASE_MODEL_ID). It creates the primary visual content for the lessons.
 LoRA Adapter (Local),Fine-Tuning Weights,Your custom weights (./biology_lora_adapter) applied on top of Stable Diffusion to make the generated images culturally relevant to African biology education.
 ControlNet (Canny),Conditional Model,"Used to impose structural control on the image generation. It takes a Canny Edge Map (a line drawing of the initial image) and forces Stable Diffusion to follow that outline, improving image coherence."
